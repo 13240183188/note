@@ -30,83 +30,83 @@ import org.springframework.stereotype.Component;
 //使用spring自动生成单例对象，
 //@Component
 public class FtpUtil {
-    //通过properties文件自动注入
-    @Value("${ftp.host}")
-    private String host;    //ftp服务器ip
-    @Value("${ftp.port}")
-    private int port;        //ftp服务器端口
-    @Value("${ftp.username}")
-    private String username;//用户名
-    @Value("${ftp.password}")
-    private String password;//密码
-    @Value("${ftp.basePath}")
-    private String basePath;//存放文件的基本路径
-    //测试的时候把这个构造函数打开，设置你的初始值，然后在代码后面的main方法运行测试
-    public FtpUtil() {
-        //System.out.println(this.toString());
-        host="192.168.100.77";
-        port=21;
-        username="ftpuser";
-        password="ftp54321";
-        basePath="/home/ftpuser/www/images";
-    }
-    /**
-     * 
-     * @param path        上传文件存放在服务器的路径
-     * @param filename    上传文件名
-     * @param input        输入流
-     * @return
-     */
-    public boolean fileUpload(String path,String filename,InputStream input) {
-        FTPClient ftp=new FTPClient();
-        try {
-            ftp.connect(host, port);
-            ftp.login(username, password);
-            //设置文件编码格式
-            ftp.setControlEncoding("UTF-8");
-            //ftp通信有两种模式
-                //PORT(主动模式)客户端开通一个新端口(>1024)并通过这个端口发送命令或传输数据,期间服务端只使用他开通的一个端口，例如21
-                //PASV(被动模式)客户端向服务端发送一个PASV命令，服务端开启一个新端口(>1024),并使用这个端口与客户端的21端口传输数据
-                //由于客户端不可控，防火墙等原因，所以需要由服务端开启端口，需要设置被动模式
-            ftp.enterLocalPassiveMode();
-            //设置传输方式为流方式
-            ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
-            //获取状态码，判断是否连接成功
-            if(!FTPReply.isPositiveCompletion(ftp.getReplyCode())) {
-                throw new RuntimeException("FTP服务器拒绝连接");
-            }
-            //转到上传文件的根目录
-            if(!ftp.changeWorkingDirectory(basePath)) {
-                throw new RuntimeException("根目录不存在，需要创建");
-            }
-            //判断是否存在目录
-            if(!ftp.changeWorkingDirectory(path)) {
-                String[] dirs=path.split("/");
-                //创建目录
-                for (String dir : dirs) {
-                    if(null==dir||"".equals(dir)) continue;
-                    //判断是否存在目录
-                    if(!ftp.changeWorkingDirectory(dir)) {
-                        //不存在则创建
-                        if(!ftp.makeDirectory(dir)) {
-                            throw new RuntimeException("子目录创建失败");
-                        }
-                        //进入新创建的目录
-                        ftp.changeWorkingDirectory(dir);
-                    }
-                }
-                //设置上传文件的类型为二进制类型
-                ftp.setFileType(FTP.BINARY_FILE_TYPE);
-                //上传文件
-                if(!ftp.storeFile(filename, input)) {
-                    return false;
-                }
-                input.close();
-                ftp.logout();
-                return true;
-            }
-            
-            
+//通过properties文件自动注入
+@Value("${ftp.host}")
+private String host;    //ftp服务器ip
+@Value("${ftp.port}")
+private int port;        //ftp服务器端口
+@Value("${ftp.username}")
+private String username;//用户名
+@Value("${ftp.password}")
+private String password;//密码
+@Value("${ftp.basePath}")
+private String basePath;//存放文件的基本路径
+//测试的时候把这个构造函数打开，设置你的初始值，然后在代码后面的main方法运行测试
+public FtpUtil() {
+//System.out.println(this.toString());
+host="192.168.100.77";
+port=21;
+username="ftpuser";
+password="ftp54321";
+basePath="/home/ftpuser/www/images";
+}
+/**
+*
+* @param path        上传文件存放在服务器的路径
+* @param filename    上传文件名
+* @param input        输入流
+* @return
+*/
+public boolean fileUpload(String path,String filename,InputStream input) {
+FTPClient ftp=new FTPClient();
+try {
+ftp.connect(host, port);
+ftp.login(username, password);
+//设置文件编码格式
+ftp.setControlEncoding("UTF-8");
+//ftp通信有两种模式
+//PORT(主动模式)客户端开通一个新端口(>1024)并通过这个端口发送命令或传输数据,期间服务端只使用他开通的一个端口，例如21
+//PASV(被动模式)客户端向服务端发送一个PASV命令，服务端开启一个新端口(>1024),并使用这个端口与客户端的21端口传输数据
+//由于客户端不可控，防火墙等原因，所以需要由服务端开启端口，需要设置被动模式
+ftp.enterLocalPassiveMode();
+//设置传输方式为流方式
+ftp.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+//获取状态码，判断是否连接成功
+if(!FTPReply.isPositiveCompletion(ftp.getReplyCode())) {
+throw new RuntimeException("FTP服务器拒绝连接");
+}
+//转到上传文件的根目录
+if(!ftp.changeWorkingDirectory(basePath)) {
+throw new RuntimeException("根目录不存在，需要创建");
+}
+//判断是否存在目录
+if(!ftp.changeWorkingDirectory(path)) {
+String[] dirs=path.split("/");
+//创建目录
+for (String dir : dirs) {
+if(null==dir||"".equals(dir)) continue;
+//判断是否存在目录
+if(!ftp.changeWorkingDirectory(dir)) {
+//不存在则创建
+if(!ftp.makeDirectory(dir)) {
+throw new RuntimeException("子目录创建失败");
+}
+//进入新创建的目录
+ftp.changeWorkingDirectory(dir);
+}
+}
+//设置上传文件的类型为二进制类型
+ftp.setFileType(FTP.BINARY_FILE_TYPE);
+//上传文件
+if(!ftp.storeFile(filename, input)) {
+return false;
+}
+input.close();
+ftp.logout();
+return true;
+}
+
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }finally {
@@ -308,7 +308,7 @@ public class FtpUtil {
         return "FtpUtil [host=" + host + ", port=" + port + ", username=" + username + ", password=" + password
                 + ", basePath=" + basePath + "]";
     }
-    
+
 }
 具体使用
 第一步：配置spring加载properties文件
@@ -323,17 +323,17 @@ ftp.basePath=/home/ftpuser/
 第二步：将工具类声明为bean
 xml方式
 <bean id="ftpUtil" class="com.cky.util.FtpUtil">
-        <property name="host" value="${ftp.host}"></property>
-        <property name="port" value="${ftp.port}"></property>
-        <property name="username" value="${ftp.username}"></property>
-        <property name="password" value="${ftp.password}"></property>
-        <property name="basePath" value="${ftp.basePath}"></property>
+<property name="host" value="${ftp.host}"></property>
+<property name="port" value="${ftp.port}"></property>
+<property name="username" value="${ftp.username}"></property>
+<property name="password" value="${ftp.password}"></property>
+<property name="basePath" value="${ftp.basePath}"></property>
 </bean>
 注解方式，组件扫描
 <context:component-scan base-package="com.cky.util"></context:component-scan>
 第三步：注入使用
 @Autowired
-    private FtpUtil ftpUtil;
+private FtpUtil ftpUtil;
 FTP常见问题：
 1、连接失败
 (1)检查ftp服务器是否打开
